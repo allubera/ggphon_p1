@@ -24,6 +24,9 @@ write.csv(f, file = "real_FRlex_Fem.csv")
 write.csv(m, file = "realFRlex_Masc.csv")
 
 #remove duplicates from ortho on full set x 
-random = data.frame(unique(x[, 5:6]))
+random = data.frame(unique(x[, 5]))
 #randomizing full set 
 random = random[sample(nrow(random), ),]
+#write random out to be randomized and split by python code
+write.csv(random, file = "FRlex_full.csv")
+
