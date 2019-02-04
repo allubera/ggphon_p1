@@ -1,0 +1,29 @@
+setwd('C:/Users/amber/Desktop/prelim_corpora')
+d = read.csv('Lexique382.csv',header=TRUE, na.strings=c("","NA"))
+c = read.csv('FrenchLexiqueLemmaCorpus.andy.csv', header=TRUE,na.strings=c("","NA"))
+names(c) = c("X3_lemme", "Freq", "X4_cgram", "X1_ortho", "X2_phon")
+d = subset(d, select= c(X1_ortho, X5_genre))
+total = merge(c,d, by = c("X1_ortho"))
+total$complete = complete.cases(total$X5_genre)
+x = total[which(total$complete =="TRUE"),]
+x = x[which(x$X4_cgram == "NOM"),]
+
+rm(total, c, d)
+#subset all true masc words
+m = x[which(x$X5_genre =="m"),]
+m = subset(m, select = -c(X5_genre, complete))
+#removing duplicates created by ortho column 
+m = data.frame(unique(m[, 5]))
+#subset all true fem words 
+f = x[which(x$X5_genre =="f"),]
+f = subset(f, select = -c(X5_genre, complete))
+#removing duplicates created by ortho column
+f = data.frame(unique(f[, 5]))
+#write out true lexicon files 
+write.csv(f, file = "real_FRlex_Fem.csv")
+write.csv(m, file = "realFRlex_Masc.csv")
+
+#remove duplicates from ortho on full set x 
+random = data.frame(unique(x[, 5:6]))
+#randomizing full set 
+random = random[sample(nrow(random), ),]
