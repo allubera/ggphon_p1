@@ -1,4 +1,6 @@
-setwd('C:/Users/amber/Desktop/prelim_corpora')
+setwd('E:/prelim_corpora')
+rm(list=ls())
+##########FRENCH################ 13000 words 
 d = read.csv('Lexique382.csv',header=TRUE, na.strings=c("","NA"))
 c = read.csv('FrenchLexiqueLemmaCorpus.andy.csv', header=TRUE,na.strings=c("","NA"))
 names(c) = c("X3_lemme", "Freq", "X4_cgram", "X1_ortho", "X2_phon")
@@ -22,11 +24,37 @@ f = data.frame(unique(f[, 5]))
 #write out true lexicon files 
 write.csv(f, file = "real_FRlex_Fem.csv")
 write.csv(m, file = "realFRlex_Masc.csv")
-
 #remove duplicates from ortho on full set x 
 random = data.frame(unique(x[, 5]))
-#randomizing full set 
-random = random[sample(nrow(random), ),]
 #write random out to be randomized and split by python code
 write.csv(random, file = "FRlex_full.csv")
 
+
+######GERMAN######### 19000 words
+rm(list =ls())
+gl = read.csv('GermanLemmaCorpus.csv', header = FALSE, na.strings=c("","NA"))
+names(gl) = c("phon", "Freq", "POS", "ortho")
+gl = gl[which(gl$POS == "N"),] #18766 words that need gender marked 
+
+gt = read.table('Germantagged.txt', header=FALSE, sep="\\", na.strings= c("","NA"))
+names(gt) = c("ID", "ortho", "POS", "Gender")
+gt = subset(gt, select= -c(ID))
+german = merge(gt,gl, by = c("ortho", "POS"))
+german$complete = complete.cases(german$Gender)
+german = german[which(german$complete =="TRUE"),]
+german = subset(german, select = -c(complete, POS))
+
+
+#fixing real masc set 
+ger_masc = german[which(german$Gender =="M"),]
+ger_masc = data.frame(unique(ger_masc[,1]))
+
+#fixing real fem set 
+ger_neut = german[which(german$Gender =="N"),]
+ger_neut = data.frame(unique(ger_neut[,1]))
+
+#write out true lexicon files 
+write.csv(ger_masc, file = "real_Gerlex_Masc.csv")
+write.csv(ger_fem, file = "real_Gerlex_Fem.csv")
+write.csv(ger_neut, file = "real_Gerlex_neut.csv")
+write.csv(german, file = "real_German_lex.csv")
