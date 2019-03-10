@@ -1,3 +1,7 @@
+setwd('C:/Users/amber/Desktop/prelim_corpora/csvs')
+rm(list=ls())
+##########FRENCH################ 13000 words 
+d = read.csv('Lexique382.csv',header=TRUE, na.strings=c("","NA"))
 c = read.csv('FrenchLexiqueLemmaCorpus.andy.csv', header=TRUE,na.strings=c("","NA"))
 names(c) = c("X3_lemme", "Freq", "X4_cgram", "X1_ortho", "X2_phon")
 d = subset(d, select= c(X1_ortho, X5_genre))
@@ -5,25 +9,40 @@ total = merge(c,d, by = c("X1_ortho"))
 total$complete = complete.cases(total$X5_genre)
 x = total[which(total$complete =="TRUE"),]
 x = x[which(x$X4_cgram == "NOM"),]
+#write.csv(x, file = "Full_FRlex.csv")
 
 rm(total, c, d)
-#subset all true masc words
+
+#getting unique combinations of gender, frequency and phones (freq based on lemma)
+x = unique(x[c("X2_phon", "Freq","X5_genre")])
+
+
+#subset all true masc words (now masc = 10076)
 m = x[which(x$X5_genre =="m"),]
-m = subset(m, select = -c(X5_genre, complete))
-#removing duplicates created by ortho column 
-m = data.frame(unique(m[, 5]))
-#subset all true fem words 
+m = subset(m, select = -c(X5_genre))
+
+#write out masc file with and without Freq 
+write.csv(m, file = "real_FRlex_Mascfreq.csv",quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
+m = subset(m, select = -c(Freq))
+write.csv(m, file = "real_FRlex_Masc.csv",quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
+
+
+#subset all true fem words (now 7572)
 f = x[which(x$X5_genre =="f"),]
-f = subset(f, select = -c(X5_genre, complete))
-#removing duplicates created by ortho column
-f = data.frame(unique(f[, 5]))
-#write out true lexicon files 
+f = subset(f, select = -c(X5_genre))
+
+#write out fem file with and without Freq
+write.csv(f, file = "real_FRlex_Femfreq.csv", quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
+f = subset(f, select = -c(Freq))
 write.csv(f, file = "real_FRlex_Fem.csv", quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
-write.csv(m, file = "realFRlex_Masc.csv",quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
-#remove duplicates from ortho on full set x 
-random = data.frame(unique(x[, 5]))
-#write random out to be randomized and split by python code
-write.csv(random, file = "FRlex_full.csv", quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
+
+#writing out full lex with and without freq for randomization
+x = subset(x, select = -c(X5_genre))
+write.csv(x, file = "real_FR_lexfreq.csv", quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
+x = subset(x, select = c(Freq))
+write.csv(x, file = "real_FR_lex.csv", quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
+
+
 
 ######GERMAN######### 19000 words
 rm(list =ls())
@@ -35,33 +54,41 @@ gt = read.table('Germantagged.txt', header=FALSE, sep="\\", na.strings= c("","NA
 names(gt) = c("ID", "ortho", "POS", "Gender")
 gt = subset(gt, select= -c(ID))
 german = merge(gt,gl, by = c("ortho", "POS"))
+
 german$complete = complete.cases(german$Gender)
 german = german[which(german$complete =="TRUE"),]
 german = subset(german, select = -c(complete, POS))
+german = german[-which(german$phon =="#NAME?"),]
+#separating out unique items 
+german = unique(german[c("ortho", "Gender", "phon", "Freq")]) 
+write.csv(german, file = "Full_Gerlex.csv", quote =FALSE, eol = "\n", row.names = FALSE, col.names = FALSE)
 
-#fixing real fem set 
+#Separating genders out 
 ger_fem = german[which(german$Gender =="F"),]
-ger_fem = data.frame(unique(ger_fem[,1]))
-
-#fixing real masc set 
 ger_masc = german[which(german$Gender =="M"),]
-ger_masc = data.frame(unique(ger_masc[,1]))
-
-#fixing real fem set 
 ger_neut = german[which(german$Gender =="N"),]
-ger_neut = data.frame(unique(ger_neut[,1]))
+
+#Removing everything but freq & writing out files 
+ger_fem = subset(ger_fem, select =c("Freq", "phon"))
+ger_masc = subset(ger_masc, select =c("Freq", "phon"))
+ger_neut = subset(ger_neut, select =c("Freq", "phon"))
+write.csv(ger_masc, file = "real_Gerlex_Mascfreq.csv",quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
+write.csv(ger_fem, file = "real_Gerlex_Femfreq.csv",quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
+write.csv(ger_neut, file = "real_Gerlex_Neutfreq.csv",quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
+
 
 #write out true lexicon files 
+ger_fem = subset(ger_fem, select =c("phon"))
+ger_masc = subset(ger_masc, select =c("phon"))
+ger_neut = subset(ger_neut, select =c("phon"))
 write.csv(ger_masc, file = "real_Gerlex_Masc.csv",quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
 write.csv(ger_fem, file = "real_Gerlex_Fem.csv",quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
-write.csv(ger_neut, file = "real_Gerlex_neut.csv",quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
+write.csv(ger_neut, file = "real_Gerlex_Neut.csv",quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
+
+#writing out full lex with freq
+german = subset(german, select = c(phon, Freq))
+write.csv(german, file = "real_German_lexfreq.csv",quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
+
+#writing out full lex with only phon
 german = subset(german, select = c(phon))
 write.csv(german, file = "real_German_lex.csv",quote = FALSE, eol= "\n", row.names=FALSE, col.names=FALSE)
-
-
-
-#######Spanish######
-#rm(list =ls())
-#s = read.csv('SpanishLemmaCorpus.csv', header = FALSE, na.strings=c("","NA"))
-#b = read.csv('spanish-task1-dev.csv', header= FALSE, na.strings=c("","NA"))
-#s = s[which(s$V2=="nc"),]
